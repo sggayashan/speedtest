@@ -1,0 +1,1 @@
+var settings = { telemetry_level: 'basic' };
