@@ -1,1 +1,0 @@
-console.log("Simulated speedtest backend JS loaded.");
