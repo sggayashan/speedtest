@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Speed Test UI</title>
-  <script src="https://cdn.jsdelivr.net/gh/librespeed/speedtest@master/speedtest.min.js"></script>
 <link href="https://fonts.cdnfonts.com/css/metropolis" rel="stylesheet" />
 <style>
-  /* Keep your original CSS exactly as you provided */
+  /* Your exact CSS as provided, no changes */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: #fff; font-family: 'Metropolis', sans-serif; display: flex; justify-content: center; padding: 40px 0; }
   .canvas { width: 100%; max-width: 1912px; padding: 0 425px; display: flex; justify-content: center; }
@@ -35,108 +34,67 @@
   .visible { opacity: 1; }
   @media (max-width: 1200px) { .canvas { padding: 20px; } .ui-wrapper { grid-template-columns: 1fr; justify-items: center; } .data-bar, .footer { width: 100%; } }
 </style>
+<script src="https://cdn.jsdelivr.net/gh/librespeed/speedtest@master/speedtest.min.js"></script>
 </head>
 <body>
 <div class="canvas">
   <div class="ui-wrapper">
-    <div class="start-area" id="startArea">
-      <div class="start-btn" id="startBtn">Start Test</div>
-      <div class="speed-counter" id="speedCounter">0MBPS</div>
-    </div>
-    <div class="pill green">
-      <span id="downloadSpeed"></span>
-      <div class="arrow-standalone arrow-down" id="downloadArrow">
-        <svg viewBox="0 0 24 24"><path d="M4 8l8 8 8-8" fill="none" stroke-linecap="round"/></svg>
-      </div>
-    </div>
-    <div class="pill purple">
-      <span id="uploadSpeed"></span>
-      <div class="arrow-standalone arrow-up" id="uploadArrow">
-        <svg viewBox="0 0 24 24"><path d="M4 16l8-8 8 8" fill="none" stroke-linecap="round"/></svg>
-      </div>
-    </div>
-    <div class="data-bar">
-      <span id="dataTitle"></span>
-      <span class="highlight" id="totalData"></span>
-    </div>
-    <div class="footer">
-      <div class="progress-fill" id="footerProgress"></div>
-      <span id="statusMessage">Press start test to speed test</span>
-    </div>
+    <div class="start-area"><div class="start-btn" id="startBtn">Start Test</div><div class="speed-counter" id="speedCounter">0MBPS</div></div>
+    <div class="pill green"><span id="downloadSpeed"></span><div class="arrow-standalone arrow-down" id="downloadArrow"><svg viewBox="0 0 24 24"><path d="M4 8l8 8 8-8" fill="none" stroke-linecap="round"/></svg></div></div>
+    <div class="pill purple"><span id="uploadSpeed"></span><div class="arrow-standalone arrow-up" id="uploadArrow"><svg viewBox="0 0 24 24"><path d="M4 16l8-8 8 8" fill="none" stroke-linecap="round"/></svg></div></div>
+    <div class="data-bar"><span id="dataTitle"></span><span class="highlight" id="totalData"></span></div>
+    <div class="footer"><div class="progress-fill" id="footerProgress"></div><span id="statusMessage">Press start test to speed test</span></div>
   </div>
 </div>
 
-<!-- Load LibreSpeed real backend library -->
-<script src="https://cdn.jsdelivr.net/gh/librespeed/speedtest@master/speedtest.min.js"></script>
 <script>
-  const startBtn = document.getElementById('startBtn');
-  const downloadSpeedEl = document.getElementById('downloadSpeed');
-  const uploadSpeedEl = document.getElementById('uploadSpeed');
-  const downloadArrow = document.getElementById('downloadArrow');
-  const uploadArrow = document.getElementById('uploadArrow');
-  const statusMsg = document.getElementById('statusMessage');
-  const footerFill = document.getElementById('footerProgress');
+const startBtn = document.getElementById('startBtn');
+const downloadSpeedEl = document.getElementById('downloadSpeed');
+const uploadSpeedEl = document.getElementById('uploadSpeed');
+const downloadArrow = document.getElementById('downloadArrow');
+const uploadArrow = document.getElementById('uploadArrow');
+const statusMsg = document.getElementById('statusMessage');
+const footerFill = document.getElementById('footerProgress');
+const speedCounter = document.getElementById('speedCounter');
 
-  startBtn.addEventListener('click', () => {
-    startBtn.style.display = 'none';
-    downloadSpeedEl.textContent = '';
-    uploadSpeedEl.textContent = '';
-    statusMsg.textContent = 'Testing...';
+startBtn.addEventListener('click', () => {
+  startBtn.style.display = 'none';
+  downloadSpeedEl.textContent = '';
+  uploadSpeedEl.textContent = '';
+  statusMsg.textContent = 'Testing...';
+  footerFill.style.width = '0%';
+  downloadArrow.classList.remove('show');
+  uploadArrow.classList.remove('show');
 
-    const s = new Speedtest();
-    s.onupdate = data => {
-      if (data.testState === 1) { // Download test
-        downloadSpeedEl.textContent = `${data.dlStatus} Mbps`;
-        downloadArrow.classList.add('show');
-        footerFill.style.width = `${data.dlProgress * 100}%`;
-        footerFill.style.background = 'rgb(103, 225, 128)';
-      }
-      if (data.testState === 3) { // Upload test
-        uploadSpeedEl.textContent = `${data.ulStatus} Mbps`;
-        uploadArrow.classList.add('show');
-        footerFill.style.width = `${data.ulProgress * 100}%`;
-        footerFill.style.background = 'rgb(144, 105, 255)';
-      }
-      if (data.testState === 2) { // Ping/latency
-        statusMsg.textContent = `Ping: ${data.pingStatus} ms`;
-      }
-    };
-    s.onend = () => {
-      statusMsg.textContent = 'Test complete. Click start to test again.';
-      startBtn.textContent = 'Restart Test';
-      startBtn.style.display = 'flex';
-    };
-    s.start();
-  });
-  const s = new Speedtest({
-  // optional: specify your server
-  // server_url: "https://your-libre-speed-server/servers.php",
-  // timeout: 1500
-});
+  const s = new Speedtest();
 
-s.onupdate = data => {
-  // 1 = download, 2 = ping, 3 = upload
-  if (data.testState === 1) {
-    downloadSpeedText.textContent = `${data.dlStatus.toFixed(2)} Mbps`;
-  }
-  if (data.testState === 2) {
-    // ping can be shown in speedCounter or another element
-  }
-  if (data.testState === 3) {
-    uploadSpeedText.textContent = `${data.ulStatus.toFixed(2)} Mbps`;
-  }
+  s.onupdate = data => {
+    if (data.testState === 1) { // Download
+      downloadSpeedEl.textContent = `${data.dlStatus.toFixed(2)} Mbps`;
+      downloadArrow.classList.add('show');
+      footerFill.style.width = `${(data.dlProgress * 100).toFixed(1)}%`;
+      footerFill.style.background = 'rgb(103, 225, 128)';
+      speedCounter.textContent = `${data.dlStatus.toFixed(2)} Mbps`;
+    }
+    if (data.testState === 3) { // Upload
+      uploadSpeedEl.textContent = `${data.ulStatus.toFixed(2)} Mbps`;
+      uploadArrow.classList.add('show');
+      footerFill.style.width = `${(data.ulProgress * 100).toFixed(1)}%`;
+      footerFill.style.background = 'rgb(144, 105, 255)';
+      speedCounter.textContent = `${data.ulStatus.toFixed(2)} Mbps`;
+    }
+  };
 
-  speedCounter.textContent = `${(data.testState===1?data.dlStatus:data.ulStatus).toFixed(2)} Mbps`;
-  footerFill.style.width = `${data.testState===1 ?
-    (data.dlStatus / s.getMaxDl()) :
-    (data.ulStatus / s.getMaxUl()) * 100
-  }%`;
-};
+  s.onend = () => {
+    statusMsg.textContent = 'Test complete. Click start to test again.';
+    startBtn.textContent = 'Restart Test';
+    startBtn.style.display = 'flex';
+    speedCounter.style.display = 'none';
+  };
 
-document.getElementById('startBtn').onclick = () => {
+  speedCounter.style.display = 'block';
   s.start();
-};
-
+});
 </script>
 </body>
 </html>
