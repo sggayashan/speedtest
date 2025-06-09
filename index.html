@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Speed Test UI</title>
+  <script src="https://cdn.jsdelivr.net/gh/librespeed/speedtest@master/speedtest.min.js"></script>
 <link href="https://fonts.cdnfonts.com/css/metropolis" rel="stylesheet" />
 <style>
   /* Keep your original CSS exactly as you provided */
@@ -107,6 +108,35 @@
     };
     s.start();
   });
+  const s = new Speedtest({
+  // optional: specify your server
+  // server_url: "https://your-libre-speed-server/servers.php",
+  // timeout: 1500
+});
+
+s.onupdate = data => {
+  // 1 = download, 2 = ping, 3 = upload
+  if (data.testState === 1) {
+    downloadSpeedText.textContent = `${data.dlStatus.toFixed(2)} Mbps`;
+  }
+  if (data.testState === 2) {
+    // ping can be shown in speedCounter or another element
+  }
+  if (data.testState === 3) {
+    uploadSpeedText.textContent = `${data.ulStatus.toFixed(2)} Mbps`;
+  }
+
+  speedCounter.textContent = `${(data.testState===1?data.dlStatus:data.ulStatus).toFixed(2)} Mbps`;
+  footerFill.style.width = `${data.testState===1 ?
+    (data.dlStatus / s.getMaxDl()) :
+    (data.ulStatus / s.getMaxUl()) * 100
+  }%`;
+};
+
+document.getElementById('startBtn').onclick = () => {
+  s.start();
+};
+
 </script>
 </body>
 </html>
