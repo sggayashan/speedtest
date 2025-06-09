@@ -1,11 +1,39 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Speed Test</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Speed Test UI</title>
 <link href="https://fonts.cdnfonts.com/css/metropolis" rel="stylesheet" />
-<link rel="stylesheet" href="style.css" />
+<style>
+  /* Keep your original CSS exactly as you provided */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: 'Metropolis', sans-serif; display: flex; justify-content: center; padding: 40px 0; }
+  .canvas { width: 100%; max-width: 1912px; padding: 0 425px; display: flex; justify-content: center; }
+  .ui-wrapper { width: 1062px; display: grid; grid-template-columns: auto auto; gap: 16px; align-items: center; position: relative; }
+  .start-area { width: 416px; height: 126px; border-radius: 63px; display: flex; justify-content: center; align-items: center; grid-row: span 2; position: relative; }
+  .start-btn { background-color: black; color: #8cff9e; font-size: 44px; font-weight: bold; width: 100%; height: 100%; border-radius: inherit; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+  .speed-counter { position: absolute; font-size: 63px; font-weight: bold; color: #999; display: none; }
+  .pill { width: 240px; height: 58px; border-radius: 30px; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: 800; color: white; position: relative; }
+  .green { background-color: rgb(103, 225, 128); }
+  .purple { background-color: rgb(144, 105, 255); }
+  .arrow-standalone { position: absolute; right: -50px; width: 40px; height: 58px; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.6s ease-in-out; }
+  .arrow-standalone.show { display: flex; opacity: 1; animation: bounce 1.2s infinite ease-in-out; }
+  .arrow-standalone svg { width: 100%; height: 100%; }
+  .arrow-standalone path { stroke-width: 7; }
+  .arrow-down path { stroke: rgb(103, 225, 128); }
+  .arrow-up path { stroke: rgb(144, 105, 255); }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  .data-bar { grid-column: span 2; width: 656px; margin: 4px auto; height: 64px; background: rgb(54, 54, 54); border-radius: 32px; padding: 0 20px; color: white; font-size: 22px; display: flex; justify-content: space-between; align-items: center; position: relative; }
+  .highlight { font-weight: 700; font-size: 26px; }
+  .footer { grid-column: span 2; width: 656px; height: 65px; background: rgb(217, 217, 217); border-radius: 32px; color: #444; font-size: 20px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; position: relative; overflow: hidden; }
+  .footer .progress-fill { position: absolute; top: 0; left: 0; height: 100%; width: 0; border-radius: 32px; z-index: 0; transition: width 0.2s linear, background-color 0.3s ease-in-out; }
+  .footer span { z-index: 1; position: relative; }
+  .fixed-arrow { width: 16px; height: 16px; opacity: 0; transition: opacity 0.5s ease; }
+  .fixed-arrow path { stroke-width: 3; }
+  .visible { opacity: 1; }
+  @media (max-width: 1200px) { .canvas { padding: 20px; } .ui-wrapper { grid-template-columns: 1fr; justify-items: center; } .data-bar, .footer { width: 100%; } }
+</style>
 </head>
 <body>
 <div class="canvas">
@@ -16,12 +44,18 @@
     </div>
     <div class="pill green">
       <span id="downloadSpeed"></span>
+      <div class="arrow-standalone arrow-down" id="downloadArrow">
+        <svg viewBox="0 0 24 24"><path d="M4 8l8 8 8-8" fill="none" stroke-linecap="round"/></svg>
+      </div>
     </div>
     <div class="pill purple">
       <span id="uploadSpeed"></span>
+      <div class="arrow-standalone arrow-up" id="uploadArrow">
+        <svg viewBox="0 0 24 24"><path d="M4 16l8-8 8 8" fill="none" stroke-linecap="round"/></svg>
+      </div>
     </div>
     <div class="data-bar">
-      <span id="dataTitle"> </span>
+      <span id="dataTitle"></span>
       <span class="highlight" id="totalData"></span>
     </div>
     <div class="footer">
@@ -30,6 +64,49 @@
     </div>
   </div>
 </div>
-<script src="script.js"></script>
+
+<!-- Load LibreSpeed real backend library -->
+<script src="https://cdn.jsdelivr.net/gh/librespeed/speedtest@master/speedtest.min.js"></script>
+<script>
+  const startBtn = document.getElementById('startBtn');
+  const downloadSpeedEl = document.getElementById('downloadSpeed');
+  const uploadSpeedEl = document.getElementById('uploadSpeed');
+  const downloadArrow = document.getElementById('downloadArrow');
+  const uploadArrow = document.getElementById('uploadArrow');
+  const statusMsg = document.getElementById('statusMessage');
+  const footerFill = document.getElementById('footerProgress');
+
+  startBtn.addEventListener('click', () => {
+    startBtn.style.display = 'none';
+    downloadSpeedEl.textContent = '';
+    uploadSpeedEl.textContent = '';
+    statusMsg.textContent = 'Testing...';
+
+    const s = new Speedtest();
+    s.onupdate = data => {
+      if (data.testState === 1) { // Download test
+        downloadSpeedEl.textContent = `${data.dlStatus} Mbps`;
+        downloadArrow.classList.add('show');
+        footerFill.style.width = `${data.dlProgress * 100}%`;
+        footerFill.style.background = 'rgb(103, 225, 128)';
+      }
+      if (data.testState === 3) { // Upload test
+        uploadSpeedEl.textContent = `${data.ulStatus} Mbps`;
+        uploadArrow.classList.add('show');
+        footerFill.style.width = `${data.ulProgress * 100}%`;
+        footerFill.style.background = 'rgb(144, 105, 255)';
+      }
+      if (data.testState === 2) { // Ping/latency
+        statusMsg.textContent = `Ping: ${data.pingStatus} ms`;
+      }
+    };
+    s.onend = () => {
+      statusMsg.textContent = 'Test complete. Click start to test again.';
+      startBtn.textContent = 'Restart Test';
+      startBtn.style.display = 'flex';
+    };
+    s.start();
+  });
+</script>
 </body>
 </html>
