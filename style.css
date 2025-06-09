@@ -1,0 +1,5 @@
+
+body { background: #fff; font-family: 'Metropolis', sans-serif; display: flex; justify-content: center; padding: 40px 0; }
+.canvas { width: 100%; max-width: 1912px; padding: 0 425px; display: flex; justify-content: center; }
+.ui-wrapper { width: 1062px; display: grid; grid-template-columns: auto auto; gap: 16px; align-items: center; position: relative; }
+/* Additional CSS rules... */

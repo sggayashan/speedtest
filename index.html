@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Speed Test</title>
+<link href="https://fonts.cdnfonts.com/css/metropolis" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="canvas">
+  <div class="ui-wrapper">
+    <div class="start-area" id="startArea">
+      <div class="start-btn" id="startBtn">Start Test</div>
+      <div class="speed-counter" id="speedCounter">0MBPS</div>
+    </div>
+    <div class="pill green">
+      <span id="downloadSpeed"></span>
+    </div>
+    <div class="pill purple">
+      <span id="uploadSpeed"></span>
+    </div>
+    <div class="data-bar">
+      <span id="dataTitle"> </span>
+      <span class="highlight" id="totalData"></span>
+    </div>
+    <div class="footer">
+      <div class="progress-fill" id="footerProgress"></div>
+      <span id="statusMessage">Press start test to speed test</span>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
